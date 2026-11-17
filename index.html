@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#111111">
+<meta name="description" content="Simulador DEMO de pantalla de seguimiento editable">
+<link rel="manifest" href="manifest.webmanifest">
+<title>Seguimiento DEMO</title>
+<style>
+:root{--pink:#f04489;--bg:#111;--panel:#171717}
+*{box-sizing:border-box}html,body{margin:0;background:#101010;color:#fff;font-family:Roboto,"Arial",sans-serif}
+body{padding-bottom:16px}.wrap{width:min(100%,440px);margin:auto}
+header{padding:14px 16px 10px;background:#171717;position:sticky;top:0;z-index:3;border-bottom:1px solid #333}
+header strong{font-size:16px}header small{display:block;color:#bbb;font-size:11px;margin-top:3px}
+.editor{padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:9px;background:#202020}
+.editor h2{grid-column:1/-1;font-size:15px;margin:0 0 2px}
+label{font-size:11px;color:#ccc;display:block}
+input,select{width:100%;margin-top:4px;background:#303030;border:1px solid #555;color:white;border-radius:7px;padding:10px;font-size:14px;min-width:0}
+.full{grid-column:1/-1}.btns{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+button{border:0;border-radius:9px;padding:12px;background:var(--pink);color:#171717;font-size:13px;font-weight:800}
+button.secondary{background:#3a3a3a;color:#fff}
+.previewTitle{padding:10px 14px 6px;font-size:12px;color:#bbb}
+#stage{width:100%;aspect-ratio:686/1770;background:#111;overflow:hidden}
+canvas{width:100%;height:100%;display:block;touch-action:pan-y}
+.hint{font-size:11px;color:#aaa;padding:8px 14px;text-align:center}
+</style>
+</head>
+<body><main class="wrap">
+<header><strong>Seguimiento DEMO</strong><small>Editor de pantalla · Vista previa y captura PNG</small></header>
+<section class="editor">
+<h2>Datos editables</h2>
+<label>Nombre del cliente<input id="name" value="sofia milagros silva"></label>
+<label>Usuario<input id="user" value="sofiamilagrossilva"></label>
+<label class="full">Dirección<input id="address" value="Vallejos 3339, Buenos Aires"></label>
+<label>Departamento<input id="apt" value="2B"></label>
+<label>Estado<select id="status"><option>Repartiendo</option><option>En camino</option><option>En espera</option><option>Entregado</option></select></label>
+<label>Teléfono<input id="phone" value="2369543210" inputmode="tel"></label>
+<label>Código / pedido<input id="order" value="#4730"></label>
+<label>Hora de pantalla<input id="clock" value="19:54"></label>
+<label>Etiqueta del mapa<input id="maplabel" value="Carrefour Market"></label>
+<label>Texto inferior<input id="footer" value="SIMULACIÓN DEMO · DATOS EDITABLES"></label>
+<div class="btns"><button id="refresh">Actualizar vista</button><button id="save">Guardar captura PNG</button><button class="secondary" id="reset">Restablecer ejemplo</button><button class="secondary" id="install" hidden>Instalar aplicación</button></div>
+</section>
+<div class="previewTitle">VISTA PREVIA · Arrastrá los marcadores rosas o azules para reubicarlos</div>
+<div id="stage"><canvas id="screen" width="686" height="1770"></canvas></div>
+<div class="hint">SIMULADOR DEMO. No consulta GPS, no rastrea personas ni confirma entregas reales.</div>
+</main>
+<script>
+const $=id=>document.getElementById(id),c=$('screen'),ctx=c.getContext('2d');
+const img=new Image();img.src='assets/map_background.jpg';
+let pins=[{x:190,y:282,r:34,color:'#f04489'},{x:496,y:576,r:22,color:'#2785ed'}],drag=-1;
+const defaults={name:'sofia milagros silva',user:'sofiamilagrossilva',address:'Vallejos 3339, Buenos Aires',apt:'2B',status:'Repartiendo',phone:'2369543210',order:'#4730',clock:'19:54',maplabel:'Carrefour Market',footer:'SIMULACIÓN DEMO · DATOS EDITABLES'};
+function round(x,y,w,h,r,color){ctx.fillStyle=color;ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill()}
+function text(t,x,y,size=26,weight=400,color='#fff'){ctx.fillStyle=color;ctx.font=`${weight} ${size}px Roboto,Arial,sans-serif`;ctx.fillText(t,x,y)}
+function fit(t,max,size,weight=400){ctx.font=`${weight} ${size}px Arial`;while(ctx.measureText(t).width>max&&size>12){size--;ctx.font=`${weight} ${size}px Arial`}return size}
+function draw(){
+ const W=686,H=1770;ctx.clearRect(0,0,W,H);ctx.fillStyle='#101b29';ctx.fillRect(0,0,W,H);
+ if(img.complete&&img.naturalWidth){ctx.drawImage(img,0,0,W,1055);ctx.fillStyle='rgba(5,15,28,.15)';ctx.fillRect(0,0,W,1055)}
+ // status bar overlay
+ text($('clock').value,14,43,23,500);text('➤',97,42,20);text('⌖ 4G ▰ ▣',568,42,20);
+ // top controls
+ round(34,108,80,80,40,'#050505');text('☰',55,162,38);
+ round(220,108,245,80,40,'#050505');text('Estado',311,138,21);text($('status').value,260,171,fit($('status').value,185,28,700),700);ctx.fillStyle='#39e31a';ctx.beginPath();ctx.arc(453,120,9,0,7);ctx.fill();
+ round(572,108,80,80,40,'#050505');text('♧',596,160,35);
+ // customer marker
+ ctx.strokeStyle='#fff';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(pins[0].x,pins[0].y+28);ctx.lineTo(pins[0].x,pins[0].y+65);ctx.stroke();
+ round(pins[0].x-31,pins[0].y-60,62,62,18,'#f04489');text('♙',pins[0].x-16,pins[0].y-17,35,700,'#111');
+ ctx.fillStyle='#f04489';ctx.beginPath();ctx.arc(pins[0].x,pins[0].y+66,12,0,7);ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=3;ctx.stroke();
+ // courier marker
+ ctx.fillStyle='#2785ed';ctx.beginPath();ctx.arc(pins[1].x,pins[1].y,20,0,7);ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=5;ctx.stroke();
+ round(573,942,80,80,40,'#f04489');text('⇄',593,997,39,700,'#111');
+ // lower detail card
+ round(0,1054,686,716,35,'#151515');round(309,1068,68,7,4,'#fff');
+ // permanent DEMO badge
+ round(548,1084,112,30,14,'#71304b');text('DEMO',578,1106,17,700);
+ let nm=$('name').value||'Cliente DEMO',usr=$('user').value||'usuario_demo';
+ text(nm,26,1155,fit(nm,420,30,700),700);text(usr,26,1206,fit(usr,420,29,700),700);
+ ctx.strokeStyle='#b50048';ctx.lineWidth=4;ctx.beginPath();ctx.arc(523,1164,43,0,7);ctx.stroke();ctx.beginPath();ctx.arc(616,1164,43,0,7);ctx.stroke();
+ text('☎',499,1178,38,700,'#e90058');text('▤',592,1178,38,700,'#e90058');
+ let addr=$('address').value||'Dirección DEMO';text(addr,26,1265,fit(addr,620,28),400);
+ text('Número de apartamento: '+($('apt').value||'—'),26,1320,27,400,'#d7d7d7');
+ ctx.strokeStyle='#484848';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,1360);ctx.lineTo(686,1360);ctx.stroke();
+ let phone=$('phone').value||'Sin teléfono';text(phone,26,1438,fit(phone,620,46,700),700);
+ let order=$('order').value||'#DEMO';text(order+' · '+usr,26,1517,fit(order+' · '+usr,630,24,700),700);
+ text($('footer').value,26,1635,fit($('footer').value,630,18,700),700,'#ef4386');
+ // Android navigation area
+ ctx.fillStyle='#111';ctx.fillRect(0,1695,686,75);round(309,1710,68,7,4,'#d8d8d8');
+ text('◀',130,1754,31,700,'#aaa');text('●',328,1754,31,700,'#aaa');text('■',528,1754,31,700,'#aaa');
+}
+$('refresh').onclick=draw;
+Object.keys(defaults).forEach(id=>$(id).addEventListener('input',draw));
+$('reset').onclick=()=>{Object.entries(defaults).forEach(([k,v])=>$(k).value=v);pins=[{x:190,y:282,r:34,color:'#f04489'},{x:496,y:576,r:22,color:'#2785ed'}];draw()};
+$('save').onclick=()=>{draw();const a=document.createElement('a');a.download='seguimiento-demo.png';a.href=c.toDataURL('image/png');a.click()};
+function pos(e){const r=c.getBoundingClientRect();return{x:(e.clientX-r.left)*686/r.width,y:(e.clientY-r.top)*1770/r.height}}
+c.addEventListener('pointerdown',e=>{const p=pos(e);drag=pins.findIndex(m=>Math.hypot(m.x-p.x,m.y-p.y)<55);if(drag>=0)c.setPointerCapture(e.pointerId)});
+c.addEventListener('pointermove',e=>{if(drag<0)return;const p=pos(e);pins[drag].x=Math.max(40,Math.min(646,p.x));pins[drag].y=Math.max(220,Math.min(1000,p.y));draw()});
+c.addEventListener('pointerup',()=>drag=-1);c.addEventListener('pointercancel',()=>drag=-1);
+let promptEvent;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();promptEvent=e;$('install').hidden=false});
+$('install').onclick=async()=>{if(promptEvent){promptEvent.prompt();await promptEvent.userChoice;promptEvent=null}};
+if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
+img.onload=draw;draw();
+</script></body></html>

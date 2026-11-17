@@ -1,0 +1,24 @@
+SEGUIMIENTO DEMO - paquete actualizado
+
+PRUEBA RÁPIDA:
+- Abrí index.html en Chrome o servilo desde un hosting HTTPS para instalarlo como PWA.
+- Para que el mapa cargue, mantené assets/map_background.jpg en la carpeta assets.
+- Editá todos los campos, mové los marcadores arrastrándolos y guardá la captura PNG.
+
+ANDROID:
+- android-project contiene un proyecto Android Studio con WebView.
+- Abrir android-project en Android Studio y compilar: Build > Build APK(s).
+- Requiere Android SDK 35 y Android Gradle Plugin 8.6.1.
+
+IMPORTANTE:
+Es un simulador DEMO. No usa GPS ni rastrea personas ni valida entregas reales. El distintivo DEMO permanece visible.
+Este entorno no dispone de Android SDK/Gradle instalados, por eso se entrega el proyecto listo para compilar, no un APK ya compilado.
+
+COMPILAR SIN PC WINDOWS (desde el celular):
+1. Extrae el ZIP en tu teléfono.
+2. En GitHub, crea un repositorio nuevo vacío.
+3. Sube el contenido de la carpeta android-project al repositorio (incluida la carpeta .github).
+4. Abre la pestaña Actions y ejecuta "Build Android APK" con Run workflow.
+5. Cuando termine, entra a la ejecución y descarga el artifact "seguimiento-demo-debug-apk".
+6. Extrae el artifact ZIP y abre app-debug.apk en Android para instalarlo.
+GitHub puede pedir que habilites Actions. El APK debug es instalable para pruebas; para distribuirlo ampliamente conviene generar una versión release firmada.
